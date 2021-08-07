@@ -1,0 +1,19 @@
+{
+  "name": "newworld_api",
+  "version": "1.0.0",
+  "description": "newworld_api_bdd",
+  "main": "index.js",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "env": "0.0.2",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.12",
+    "pg": "^8.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Akemine",
+  "license": "ISC"
+}
