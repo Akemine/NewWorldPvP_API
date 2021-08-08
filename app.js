@@ -18,59 +18,9 @@ const pool = new Pool({
   port: process.env.DATABASE_PORT,
 });
 
-/** Requête qui crée une mission
- * @param difficulte : renvoi la difficulté de la mission
- */
-async function createGuild(req, res) {
-  // Constante qui récupère les informations du body (from FRONT)
-  const {
-    id_type_mission,
-    id_type_remuneration,
-    titremission,
-    montantproposeur,
-    nombredepersonnes,
-    difficulte,
-    localisation,
-    adresse, 
-    ville, 
-    codepostal,
-    duree,
-    description
-  } = req.body;
-
-  // Connection à l'API et insertion des données
-  pool.connect((err, client, release) => {
-    client.query(
-      "INSERT INTO DEV.mission (id_type_mission, id_type_remuneration, titremission, montantproposeur, nombredepersonnes, difficulte, localisation, adresse, ville, codepostal, duree, description) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
-      [
-        id_type_mission,
-        id_type_remuneration,
-        titremission,
-        montantproposeur,
-        nombredepersonnes,
-        difficulte,
-        localisation,
-        adresse,
-        ville,
-        codepostal,
-        duree,
-        description
-      ], (err, res) => {
-        client.release(); // Release la connection de l'utilisateur car plus nécessaire
-        // Throw les erreurs
-        if (err) {
-          throw err;
-        }
-      }
-    );
-  });
-  // Renvoie le status OK
-  res.sendStatus(200);
-}
-
 async function getGuild(req, res) {
 
-  let sql = "SELECT * FROM public.guild"; // Retourne les guildes
+  let sql = "SELECT * FROM public.account"; // Retourne les guildes
 
   pool.connect((err, client, release) => {
     client.query(sql, [], (err, result) => {
@@ -102,7 +52,7 @@ async function getUpcomingWars(req, res) {
 
   console.log("Upcoming wars")
 
-  let sql = "SELECT * FROM public.war_en_attente order by ID desc limit 10"; // Retourne dernières wars
+  let sql = "SELECT * FROM public.war_proposed order by ID desc limit 10"; // Retourne dernières wars
 
   pool.connect((err, client, release) => {
     client.query(sql, [], (err, result) => {
@@ -118,7 +68,7 @@ async function getUpcomingWars(req, res) {
 
 async function getServerList(req, res) {
 
-  let sql = "SELECT distinct server FROM public.guild"; // Retourne dernières wars
+  let sql = "SELECT distinct server FROM public.account"; // Retourne dernières wars
 
   pool.connect((err, client, release) => {
     client.query(sql, [], (err, result) => {
@@ -138,7 +88,7 @@ async function checkLogin(req, res) {
   } = req.body;
   console.log("test 2")
   pool.connect((err, client, release) => {
-    client.query("SELECT count(*) FROM public.guild WHERE login = $1 AND password = $2", 
+    client.query("SELECT count(*) FROM public.account WHERE guild_name = $1 AND password = $2", 
     [
       login,
       password
@@ -167,7 +117,7 @@ async function findGuildWhoAreNotInMyFaction(req, res) {
   } = req.body;
 
 pool.connect((err, client, release) => {
-  client.query("SELECT id, nom, faction FROM public.guild WHERE faction != (SELECT faction FROM public.guild WHERE nom = $1)", 
+  client.query("SELECT id, guild_name, faction FROM public.account WHERE faction != (SELECT faction FROM public.account WHERE guild_name = $1)", 
   [
     myGuild
   ], (err, result) => {
@@ -186,7 +136,7 @@ async function getMyWarProposed(req, res) {
   } = req.body;
 
 pool.connect((err, client, release) => {
-  client.query("SELECT * FROM public.war_en_attente WHERE guild_proposeur = $1", 
+  client.query("SELECT * FROM public.war_proposed WHERE guild_proposeur = $1", 
   [
     myGuild
   ], (err, result) => {
@@ -206,7 +156,7 @@ async function getMyWarIHaveToAccept(req, res) {
   } = req.body;
 
 pool.connect((err, client, release) => {
-  client.query("SELECT * FROM public.war_en_attente WHERE guild_attaquer = $1", 
+  client.query("SELECT * FROM public.war_proposed WHERE guild_attaquer = $1", 
   [
     myGuild
   ], (err, result) => {
@@ -230,7 +180,7 @@ async function declareWarTo(req, res) {
   } = req.body;
 
 pool.connect((err, client, release) => {
-  client.query("INSERT INTO public.war_en_attente (guild_proposeur, guild_attaquer, lieu, heure, date_war, nombreJoueurs, accepted) VALUES ($1, $2, $3, $4, $5, $6, null)", 
+  client.query("INSERT INTO public.war_proposed (guild_proposeur, guild_attaquer, lieu, heure, date_war, nombrejoueurs, accepted) VALUES ($1, $2, $3, $4, $5, $6, null)", 
   [
     guild_proposeur,
     guild_attaquer,
@@ -252,9 +202,8 @@ async function acceptWar(req, res) {
   const {
     id
   } = req.body;
-
 pool.connect((err, client, release) => {
-  client.query("UPDATE public.war_en_attente SET accepted = true WHERE id = $1", 
+  client.query("UPDATE public.war_proposed SET accepted = true WHERE id = $1", 
   [
     id
   ], (err, result) => {
@@ -273,7 +222,7 @@ async function declineWar(req, res) {
   } = req.body;
 
 pool.connect((err, client, release) => {
-  client.query("UPDATE public.war_en_attente SET accepted = false WHERE id = $1", 
+  client.query("UPDATE public.war_proposed SET accepted = false WHERE id = $1", 
   [
     id
   ], (err, result) => {
@@ -286,8 +235,66 @@ pool.connect((err, client, release) => {
 });
 }
 
+async function guildWon(req, res) {
+  const {
+    id_winner,
+    id_looser
+  } = req.body;
+
+pool.connect((err, client, release) => {
+  client.query("UPDATE public.ladder SET win = win + 1, cote = cote + 100 WHERE id = $1", 
+  [
+    id_winner
+  ], (err, result) => {
+    if (err) {
+      throw err;
+    }
+    res.json(result.rows);
+  });
+  
+});
+}
+
+async function guildLoose(req, res) {
+  console.log("test guild loose ?!")
+  const {
+    id_looser
+  } = req.body;
+
+pool.connect((err, client, release) => {
+  client.query("UPDATE public.ladder SET loose = loose + 1, cote = cote - 100 WHERE id = $1", 
+  [
+    id_looser
+  ], (err, result) => {
+    if (err) {
+      throw err;
+    }
+    res.json(result.rows);
+  });
+  
+});
+}
+
+async function archiveWar(req, res) {
+  const {
+    id
+  } = req.body;
+
+pool.connect((err, client, release) => {
+  client.query("UPDATE public.war_proposed SET archive = true WHERE id = $1", 
+  [
+    id
+  ], (err, result) => {
+    if (err) {
+      throw err;
+    }
+    res.json(result.rows);
+  });
+  
+});
+}
+
 module.exports = {
-  createGuild,
   getGuild,
   getLastWars,
   getUpcomingWars,
@@ -298,5 +305,8 @@ module.exports = {
   getMyWarIHaveToAccept,
   declareWarTo,
   acceptWar,
-  declineWar
+  declineWar,
+  guildWon,
+  guildLoose,
+  archiveWar
 };

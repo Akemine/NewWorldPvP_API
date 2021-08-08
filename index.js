@@ -30,7 +30,6 @@ app.get('/api/v1/getGuild', db.getGuild) // Return les guildes
 app.get('/api/v1/getServerList', db.getServerList) // Return les servers
 app.get('/api/v1/getLastWars', db.getLastWars) // Return les dernières wars
 app.get('/api/v1/getUpcomingWars', db.getUpcomingWars) // Return les wars à venir
-app.post('/api/v1/createGuild', db.createGuild) // Crée une guilde
 app.post('/api/v1/checkLogin', db.checkLogin) // Crée une guilde
 app.post('/api/v1/findGuildWhoAreNotInMyFaction', db.findGuildWhoAreNotInMyFaction) // Return les wars à venir
 app.post('/api/v1/getMyWarProposed', db.getMyWarProposed) // Return mes wars en attentes d'acceptation ou non
@@ -38,6 +37,9 @@ app.post('/api/v1/getMyWarIHaveToAccept', db.getMyWarIHaveToAccept) // Return le
 app.post('/api/v1/declareWarTo', db.declareWarTo) // Propose une war à quelqu'un
 app.post('/api/v1/acceptWar', db.acceptWar) // Accept une war
 app.post('/api/v1/declineWar', db.declineWar) // Decline une war
+app.post('/api/v1/guildWon', db.guildWon) // Upgrade la côte de la guilde
+app.post('/api/v1/guildLoose', db.guildLoose) // Baisse la côte de la guilde
+app.post('/api/v1/archiveWar', db.archiveWar) // Archive la war
 
 
 
