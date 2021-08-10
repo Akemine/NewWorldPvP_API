@@ -28,7 +28,8 @@ app.use((req, res, next) => {
 
 app.get('/api/v1/getGuild', db.getGuild) // Return les guildes
 app.get('/api/v1/getServerList', db.getServerList) // Return les servers
-app.get('/api/v1/getLastWars', db.getLastWars) // Return les dernières wars
+app.get('/api/v1/getLastWars', db.getLastWars) // Return les 10 dernières wars
+app.get('/api/v1/getAllLastWars', db.getAllLastWars) // Return toutes les wars passées
 app.get('/api/v1/getUpcomingWars', db.getUpcomingWars) // Return les wars à venir
 app.post('/api/v1/checkLogin', db.checkLogin) // Crée une guilde
 app.post('/api/v1/findGuildWhoAreNotInMyFaction', db.findGuildWhoAreNotInMyFaction) // Return les wars à venir
@@ -37,9 +38,25 @@ app.post('/api/v1/getMyWarIHaveToAccept', db.getMyWarIHaveToAccept) // Return le
 app.post('/api/v1/declareWarTo', db.declareWarTo) // Propose une war à quelqu'un
 app.post('/api/v1/acceptWar', db.acceptWar) // Accept une war
 app.post('/api/v1/declineWar', db.declineWar) // Decline une war
-app.post('/api/v1/guildWon', db.guildWon) // Upgrade la côte de la guilde
+app.post('/api/v1/synchroniseElo', db.synchroniseElo) // Upgrade la côte de la guilde
 app.post('/api/v1/guildLoose', db.guildLoose) // Baisse la côte de la guilde
-app.post('/api/v1/archiveWar', db.archiveWar) // Archive la war
+app.get('/api/v1/getLeaderboard', db.getLeaderboard) // Return le leaderboard
+app.get('/api/v1/getCote', db.getCote) // Return la cote d'une guilde
+app.post('/api/v1/getLooser', db.getLooser) // Return la cote d'une guilde
+app.post('/api/v1/createNewAccount', db.createNewAccount) // Return la cote d'une guilde
+app.post('/api/v1/getAccountData', db.getAccountData) // Crée une guilde
+app.get('/api/v1/getAllGuild', db.getAllGuild) // Return le leaderboard
+app.get('/api/v1/getBannedGuild', db.getBannedGuild) // Return le leaderboard
+app.post('/api/v1/banGuild', db.banGuild) // Ban une guilde ladder & compte
+app.post('/api/v1/unBanGuild', db.unBanGuild) // Ban une guilde ladder & compte
+app.post('/api/v1/warnGuild', db.warnGuild) // Warn une guilde
+app.post('/api/v1/unWarnGuild', db.unWarnGuild) // Warn une guilde
+app.post('/api/v1/cancelMatch', db.cancelMatch) // Cancel entièrement une war
+app.post('/api/v1/replayMatch', db.replayMatch) // Permet de replay une war
+app.post('/api/v1/getAllResultOfMyGuild', db.getAllResultOfMyGuild) // Permet de replay une war
+
+
+
 
 
 
