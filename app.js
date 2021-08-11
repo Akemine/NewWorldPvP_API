@@ -83,7 +83,7 @@ async function getUpcomingWars(req, res) {
 
 async function getServerList(req, res) {
 
-  let sql = "SELECT distinct server FROM public.account"; // Retourne dernières wars
+  let sql = "SELECT distinct server FROM public.account order by server asc"; // Retourne dernières wars
 
   pool.connect((err, client, release) => {
     client.query(sql, [], (err, result) => {
@@ -95,6 +95,7 @@ async function getServerList(req, res) {
     });
   });
 }
+
 
 async function checkLogin(req, res) {
   const {
@@ -512,8 +513,8 @@ async function guildLoose(req, res) {
 }
 
 async function getLeaderboard(req, res) {
-  pool.connect((err, client, release) => {
 
+  pool.connect((err, client, release) => {
     client.query("SELECT *  FROM public.ladder INNER JOIN public.account ON public.account.guild_name = public.ladder.name and banned = false ORDER BY cote desc",
       (err, result) => {
         release();
