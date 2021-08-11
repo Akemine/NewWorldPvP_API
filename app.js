@@ -701,7 +701,7 @@ async function unBanGuild(req, res) {
   } = req.body;
 
   // UNBAN LA GUILDE
-  await pool.query("UPDATE PUBLIC.ACCOUNT SET banned = false WHERE ID = $1", [idGuild])
+  await pool.query("UPDATE PUBLIC.ACCOUNT SET banned = false, warn = 0 WHERE ID = $1", [idGuild])
     .catch(err => console.error('Error in query 1', err.stack))
 
   res.json("OK")
