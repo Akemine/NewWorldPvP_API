@@ -53,13 +53,11 @@ app.post('/api/v1/unBanGuild', db.unBanGuild) // Ban une guilde ladder & compte
 app.post('/api/v1/warnGuild', db.warnGuild) // Warn une guilde
 app.post('/api/v1/unWarnGuild', db.unWarnGuild) // Warn une guilde
 app.post('/api/v1/cancelMatch', db.cancelMatch) // Cancel entièrement une war
+app.post('/api/v1/cancelProposedWar', db.cancelProposedWar) // Cancel entièrement une war proposé
 app.post('/api/v1/replayMatch', db.replayMatch) // Permet de replay une war
 app.post('/api/v1/getAllResultOfMyGuild', db.getAllResultOfMyGuild) // Permet de replay une war
-
-
-
-
-
+app.post('/api/v1/setGuildActif', db.setGuildActif) // Rend une guilde actif
+app.post('/api/v1/refuseGuild', db.refuseGuild) // Rend une guilde actif
 
 
 const normalizePort = val => {

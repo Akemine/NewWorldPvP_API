@@ -20,7 +20,7 @@ const pool = new Pool({
 
 async function getAccount(req, res) {
 
-  let sql = "SELECT * FROM public.account"; // Retourne les guildes
+  let sql = "SELECT * FROM public.account where role = 'guild'"; // Retourne les guildes
 
   pool.connect((err, client, release) => {
     client.query(sql, [], (err, result) => {
@@ -162,7 +162,7 @@ async function getAccountData(req, res) {
 
 async function getAllGuild(req, res) {
   pool.connect((err, client, release) => {
-    client.query("SELECT * FROM public.account WHERE role = 'guild' and banned = false order by guild_name ",
+    client.query("SELECT * FROM public.account WHERE role = 'guild' and banned = false and actif = true order by guild_name ",
       (err, result) => {
         release();
         if (err) {
@@ -175,7 +175,7 @@ async function getAllGuild(req, res) {
 
 async function getBannedGuild(req, res) {
   pool.connect((err, client, release) => {
-    client.query("SELECT * FROM public.account WHERE role = 'guild' and banned = true order by guild_name ",
+    client.query("SELECT * FROM public.account WHERE role = 'guild' and banned = true and actif = true order by guild_name ",
       (err, result) => {
         release();
         if (err) {
@@ -348,10 +348,21 @@ async function getCote(req, res) {
         }
         res.json(result.rows);
       });
-
-
-
   });
+}
+
+async function cancelProposedWar(req, res) {
+
+
+  const {
+    idWar
+  } = req.body;
+
+  // DELETE LA WAR
+  await pool.query("DELETE FROM PUBLIC.WAR_PROPOSED WHERE id = $1", [idWar])
+    .catch(err => console.error('Error in query 1', err.stack))
+
+  res.json("OK")
 }
 
 async function getLooser(req, result) {
@@ -530,7 +541,7 @@ async function guildLoose(req, res) {
 async function getLeaderboard(req, res) {
 
   pool.connect((err, client, release) => {
-    client.query("SELECT *  FROM public.ladder INNER JOIN public.account ON public.account.guild_name = public.ladder.name and banned = false ORDER BY cote desc",
+    client.query("SELECT *  FROM public.ladder INNER JOIN public.account ON public.account.guild_name = public.ladder.name and banned = false and actif = true ORDER BY cote desc",
       (err, result) => {
         release();
         if (err) {
@@ -550,17 +561,12 @@ async function createNewAccount(req, res) {
     faction,
     server,
     ip, 
-    city,
-    country_code,
-    country_name,
-    latitude,
-    longitude,
     timestamp
   } = req.body;
 
-    // ADD ADDRESS DU CREATEUR
-    await pool.query("INSERT INTO public.address (ip, city, country_code, country_name, latitude, longitude, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)", [ip, city, country_code, country_name, latitude, longitude, timestamp])
-    .catch(err => console.error('Error in query address', err.stack))
+  // ADD ADDRESS DU CREATEUR
+  await pool.query("INSERT INTO public.address (ip, timestamp) VALUES ($1, $2)", [ip, timestamp])
+  .catch(err => console.error('Error in query address', err.stack))
 
   // CREE LA GUILDE
   await pool.query("INSERT INTO public.account (pseudo, guild_name, password, faction, server) VALUES ($1, $2, $3, $4, $5)", [pseudo, guild_name, password, faction, server])
@@ -771,7 +777,7 @@ async function cancelMatch(req, res) {
 
   await pool.query("SELECT * FROM PUBLIC.LAST_WARS WHERE id = $1", [idWar])
     .then(res => {
-      winner_name = res.rows[0].win_guild,
+        winner_name = res.rows[0].win_guild,
         winner_cote = res.rows[0].win_cote,
         looser_name = res.rows[0].loose_guild,
         looser_cote = res.rows[0].win_cote
@@ -792,6 +798,35 @@ async function cancelMatch(req, res) {
 
   res.json("OK")
 }
+
+
+
+async function setGuildActif(req, res) {
+  const {
+    guildName
+  } = req.body;
+
+  // DELETE LA WAR
+  await pool.query("UPDATE public.account set actif = true where guild_name = $1", [guildName])
+  .catch(err => console.error('Error in query 1', err.stack))
+
+  res.json("OK")
+}
+
+async function refuseGuild(req, res) {
+  const {
+    guildName
+  } = req.body;
+
+  // DELETE LA WAR
+  await pool.query("delete from public.account where guild_name = $1", [guildName])
+  .catch(err => console.error('Error in query 1', err.stack))
+  await pool.query("delete from public.ladder where name = $1", [guildName])
+  .catch(err => console.error('Error in query 1', err.stack))
+
+  res.json("OK")
+}
+
 
 async function replayMatch(req, res) {
 
@@ -864,6 +899,9 @@ module.exports = {
   unWarnGuild,
   getBannedGuild,
   cancelMatch,
+  cancelProposedWar,
   replayMatch,
-  getAllResultOfMyGuild
+  getAllResultOfMyGuild,
+  setGuildActif,
+  refuseGuild
 };
