@@ -26,7 +26,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/api/v1/getGuild', db.getGuild) // Return les guildes
+app.get('/api/v1/getAccount', db.getAccount) // Return les guildes
+app.get('/api/v1/getAddress', db.getAddress) // Return les guildes
 app.get('/api/v1/getServerList', db.getServerList) // Return les servers
 app.get('/api/v1/getLastWars', db.getLastWars) // Return les 10 dernières wars
 app.get('/api/v1/getAllLastWars', db.getAllLastWars) // Return toutes les wars passées

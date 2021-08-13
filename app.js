@@ -18,9 +18,24 @@ const pool = new Pool({
   port: process.env.DATABASE_PORT,
 });
 
-async function getGuild(req, res) {
+async function getAccount(req, res) {
 
   let sql = "SELECT * FROM public.account"; // Retourne les guildes
+
+  pool.connect((err, client, release) => {
+    client.query(sql, [], (err, result) => {
+      release();
+      if (err) {
+        throw err;
+      }
+      res.json(result.rows);
+    });
+  });
+}
+
+async function getAddress(req, res) {
+
+  let sql = "SELECT * FROM public.address"; // Retourne les guildes
 
   pool.connect((err, client, release) => {
     client.query(sql, [], (err, result) => {
@@ -198,7 +213,7 @@ async function findGuildWhoAreNotInMyFaction(req, res) {
   } = req.body;
 
   pool.connect((err, client, release) => {
-    client.query("SELECT id, guild_name, faction FROM public.account WHERE role = 'guild' and faction != (SELECT faction FROM public.account WHERE guild_name = $1)",
+    client.query("SELECT id, guild_name, faction FROM public.account WHERE role = 'guild' and faction != (SELECT faction FROM public.account WHERE guild_name = $1) and server = (SELECT server FROM public.account WHERE guild_name = $1)",
       [
         myGuild
       ], (err, result) => {
@@ -533,8 +548,19 @@ async function createNewAccount(req, res) {
     guild_name,
     password,
     faction,
-    server
+    server,
+    ip, 
+    city,
+    country_code,
+    country_name,
+    latitude,
+    longitude,
+    timestamp
   } = req.body;
+
+    // ADD ADDRESS DU CREATEUR
+    await pool.query("INSERT INTO public.address (ip, city, country_code, country_name, latitude, longitude, timestamp) VALUES ($1, $2, $3, $4, $5, $6, $7)", [ip, city, country_code, country_name, latitude, longitude, timestamp])
+    .catch(err => console.error('Error in query address', err.stack))
 
   // CREE LA GUILDE
   await pool.query("INSERT INTO public.account (pseudo, guild_name, password, faction, server) VALUES ($1, $2, $3, $4, $5)", [pseudo, guild_name, password, faction, server])
@@ -811,7 +837,8 @@ async function replayMatch(req, res) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 module.exports = {
-  getGuild,
+  getAccount,
+  getAddress,
   getLastWars,
   getAllLastWars,
   getUpcomingWars,
