@@ -58,6 +58,10 @@ app.post('/api/v1/replayMatch', db.replayMatch) // Permet de replay une war
 app.post('/api/v1/getAllResultOfMyGuild', db.getAllResultOfMyGuild) // Permet de replay une war
 app.post('/api/v1/setGuildActif', db.setGuildActif) // Rend une guilde actif
 app.post('/api/v1/refuseGuild', db.refuseGuild) // Rend une guilde actif
+app.post('/api/v1/deleteIP', db.deleteIP) // Delete l'ip du joueur
+app.get('/api/v1/findGuildWhoNeedToBeAccepted', db.findGuildWhoNeedToBeAccepted) // Delete l'ip du joueur
+app.post('/api/v1/getCountMyWarIHaveToAccept', db.getCountMyWarIHaveToAccept) // Delete l'ip du joueur
+
 
 
 const normalizePort = val => {

@@ -33,6 +33,21 @@ async function getAccount(req, res) {
   });
 }
 
+async function findGuildWhoNeedToBeAccepted(req, res) {
+
+  let sql = "SELECT * FROM public.account where role = 'guild' and banned = false and actif = false"; // Retourne les guildes
+
+  pool.connect((err, client, release) => {
+    client.query(sql, [], (err, result) => {
+      release();
+      if (err) {
+        throw err;
+      }
+      res.json(result.rows);
+    });
+  });
+}
+
 async function getAddress(req, res) {
 
   let sql = "SELECT * FROM public.address"; // Retourne les guildes
@@ -252,7 +267,26 @@ async function getMyWarIHaveToAccept(req, res) {
   } = req.body;
 
   pool.connect((err, client, release) => {
-    client.query("SELECT * FROM public.war_proposed WHERE guild_attaquer = $1",
+    client.query("SELECT * FROM public.war_proposed WHERE guild_attaquer = $1 and accepted is NULL",
+      [
+        myGuild
+      ], (err, result) => {
+        release();
+        if (err) {
+          throw err;
+        }
+        res.json(result.rows);
+      });
+  });
+}
+
+async function getCountMyWarIHaveToAccept(req, res) {
+  const {
+    myGuild
+  } = req.body;
+
+  pool.connect((err, client, release) => {
+    client.query("SELECT count(*) FROM public.war_proposed WHERE guild_attaquer = $1 and accepted is NULL",
       [
         myGuild
       ], (err, result) => {
@@ -565,7 +599,7 @@ async function createNewAccount(req, res) {
   } = req.body;
 
   // ADD ADDRESS DU CREATEUR
-  await pool.query("INSERT INTO public.address (ip, timestamp) VALUES ($1, $2)", [ip, timestamp])
+  await pool.query("INSERT INTO public.address (ip, timestamp, guild_name) VALUES ($1, $2, $3)", [ip, timestamp, guild_name])
   .catch(err => console.error('Error in query address', err.stack))
 
   // CREE LA GUILDE
@@ -579,6 +613,17 @@ async function createNewAccount(req, res) {
   res.json("OK")
 }
 
+async function deleteIP(req, res) {
+  const {
+    ip
+  } = req.body;
+
+  // ADD ADDRESS DU CREATEUR
+  await pool.query("DELETE FROM public.address WHERE ip = $1", [ip])
+  .catch(err => console.error('Error in query address', err.stack))
+
+  res.json("OK")
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////// SYSTEME DE ELO ////////////////////////////////////////////////////////////
@@ -903,5 +948,8 @@ module.exports = {
   replayMatch,
   getAllResultOfMyGuild,
   setGuildActif,
-  refuseGuild
+  refuseGuild,
+  deleteIP,
+  findGuildWhoNeedToBeAccepted,
+  getCountMyWarIHaveToAccept
 };
