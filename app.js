@@ -134,7 +134,7 @@ async function checkLogin(req, res) {
   } = req.body;
   console.log("test 2")
   pool.connect((err, client, release) => {
-    client.query("SELECT count(*) FROM public.account WHERE guild_name = $1 AND password = $2",
+    client.query("SELECT count(*) FROM public.account WHERE guild_name = $1 AND password = $2 and actif = true",
       [
         login,
         password
